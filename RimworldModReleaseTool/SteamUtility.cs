@@ -35,16 +35,22 @@ namespace RimworldModReleaseTool
             }
         }
 
-        public static bool Upload(Mod mod, string changeNotes = "changeNotes are for the weeeak")
+        public static bool Upload(Mod mod, string changeNotes)
         {
+            if(string.IsNullOrEmpty(changeNotes))
+            {
+                changeNotes = $"[Auto-generated text]: Update on {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+            }
             var creating = false;
             if (mod.PublishedFileId == PublishedFileId_t.Invalid)
             {
                 // create item first.
                 creating = true;
-                Console.WriteLine("no PublishedFileId found, creating new mod...");
+                Console.WriteLine("No PublishedFileId found, create new mod?");
+                Console.ReadLine();
 
-                if (!Create(mod)) throw new Exception("mod creation failed!");
+                if (!Create(mod)) 
+                    throw new Exception("mod creation failed!");
             }
 
             // set up steam API call
@@ -57,16 +63,21 @@ namespace RimworldModReleaseTool
             submitResultCallback.Set(call);
 
             // keep checking for async call to complete
-            while (!ready.WaitOne(50))
+            var lastStatus = "";
+            while (!ready.WaitOne(500))
             {
-                ulong done, total;
-                var status = SteamUGC.GetItemUpdateProgress(handle, out done, out total);
+                var status = SteamUGC.GetItemUpdateProgress(handle, out ulong done, out ulong total);
                 SteamAPI.RunCallbacks();
-                Console.WriteLine(status + ": " + done + "/" + total + " completed.");
+                if (lastStatus != status.ToString())
+                {
+                    Console.WriteLine($"Current step: {status}");
+                    lastStatus = status.ToString();
+                }
             }
 
             // we have completed!
-            if (submitResult.m_eResult != EResult.k_EResultOK) Console.WriteLine(submitResult.m_eResult);
+            if (submitResult.m_eResult != EResult.k_EResultOK) 
+                Console.WriteLine($"Unexpected result: {submitResult.m_eResult}");
             return submitResult.m_eResult == EResult.k_EResultOK;
         }
 
@@ -87,7 +98,7 @@ namespace RimworldModReleaseTool
             createResultCallback.Set(call);
 
             // keep checking for async call to complete
-            while (!ready.WaitOne(50))
+            while (!ready.WaitOne(500))
             {
                 SteamAPI.RunCallbacks();
                 Console.WriteLine("Waiting for item creation to complete.");
@@ -121,9 +132,6 @@ namespace RimworldModReleaseTool
             SteamUGC.SetItemContent(handle, mod.ContentFolder);
             if (mod.Preview != null)
                 SteamUGC.SetItemPreview(handle, mod.Preview);
-            if (creating)
-                SteamUGC.SetItemVisibility(handle,
-                    ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPrivate);
         }
 
         public static void Shutdown()

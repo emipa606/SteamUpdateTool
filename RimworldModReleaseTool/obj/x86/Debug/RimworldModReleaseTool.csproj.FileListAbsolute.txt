@@ -14,3 +14,12 @@ C:\Program Files (x86)\Steam\steamapps\common\RimWorld\ModsWorkspace\Rimworld-Mo
 C:\Program Files (x86)\Steam\steamapps\common\RimWorld\ModsWorkspace\Rimworld-Mod-Release-Tool\RimworldModReleaseTool\bin\x86\Debug\System.Diagnostics.DiagnosticSource.xml
 C:\Program Files (x86)\Steam\steamapps\common\RimWorld\ModsWorkspace\Rimworld-Mod-Release-Tool\RimworldModReleaseTool\obj\x86\Debug\RimworldModReleaseTool.csproj.CopyComplete
 C:\Program Files (x86)\Steam\steamapps\common\RimWorld\ModsWorkspace\Rimworld-Mod-Release-Tool\RimworldModReleaseTool\obj\x86\Debug\RimworldModReleaseTool.exe
+E:\ModPublishing\SteamUpdateTool\Compiled\configDefaults.xml
+E:\ModPublishing\SteamUpdateTool\Compiled\dlls\steam_api64.dll
+E:\ModPublishing\SteamUpdateTool\Compiled\config.xml
+E:\ModPublishing\SteamUpdateTool\Compiled\RimworldModReleaseTool.exe.config
+E:\ModPublishing\SteamUpdateTool\Compiled\RimworldModReleaseTool.exe
+E:\ModPublishing\SteamUpdateTool\RimworldModReleaseTool\obj\x86\Debug\RimworldModReleaseTool.csprojAssemblyReference.cache
+E:\ModPublishing\SteamUpdateTool\RimworldModReleaseTool\obj\x86\Debug\RimworldModReleaseTool.csproj.CoreCompileInputs.cache
+E:\ModPublishing\SteamUpdateTool\RimworldModReleaseTool\obj\x86\Debug\RimworldModReleaseTool.csproj.CopyComplete
+E:\ModPublishing\SteamUpdateTool\RimworldModReleaseTool\obj\x86\Debug\RimworldModReleaseTool.exe

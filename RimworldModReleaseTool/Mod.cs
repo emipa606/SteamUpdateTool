@@ -20,29 +20,34 @@ namespace RimworldModReleaseTool
             if (!File.Exists(about)) throw new Exception($"About.xml not found at ({about})");
 
             ContentFolder = path;
-            Tags = new List<string>();
-            Tags.Add("Mod");
+            Tags = new List<string>
+            {
+                "Mod"
+            };
 
             // open About.xml
             var aboutXml = new XmlDocument();
             aboutXml.Load(about);
-            for (var i = 0; i < aboutXml.ChildNodes.Count; i++)
+            foreach (XmlNode node in aboutXml.ChildNodes)
             {
-                var node = aboutXml.ChildNodes[i];
                 if (node.Name == "ModMetaData")
-                    for (var j = 0; j < node.ChildNodes.Count; j++)
+                {
+                    foreach (XmlNode metaNode in node.ChildNodes)
                     {
-                        var meta = node.ChildNodes[j];
-                        if (meta.Name.ToLower() == "name")
-                            Name = meta.InnerText;
-                        if (meta.Name.ToLower() == "description")
-                            Description = meta.InnerText;
-                        if (meta.Name.ToLower() == "targetversion")
+                        if (metaNode.Name.ToLower() == "name")
+                            Name = metaNode.InnerText;
+                        if (metaNode.Name.ToLower() == "description")
+                            Description = metaNode.InnerText;
+                        if (metaNode.Name == "supportedVersions")
                         {
-                            var version = VersionFromString(meta.InnerText);
-                            Tags.Add(version.Major + "." + version.Minor);
+                            foreach (XmlNode tagNode in metaNode.ChildNodes)
+                            {
+                                Version.TryParse(tagNode.InnerText, out Version version);
+                                Tags.Add(version.Major + "." + version.Minor);
+                            }
                         }
                     }
+                }
             }
 
             // get preview image
@@ -52,8 +57,7 @@ namespace RimworldModReleaseTool
 
             // get publishedFileId
             var pubfileIdPath = PathCombine(path, "About", "PublishedFileId.txt");
-            uint id;
-            if (File.Exists(pubfileIdPath) && uint.TryParse(File.ReadAllText(pubfileIdPath), out id))
+            if (File.Exists(pubfileIdPath) && uint.TryParse(File.ReadAllText(pubfileIdPath), out uint id))
                 PublishedFileId = new PublishedFileId_t(id);
             else
                 PublishedFileId = PublishedFileId_t.Invalid;
@@ -80,46 +84,12 @@ namespace RimworldModReleaseTool
         public override string ToString()
         {
             return
-                $"Name: {Name}\nPreview: {Preview}\nPublishedFileId: {PublishedFileId}"; // \nDescription: {Description}";
+                $"Name: {Name}\nPreview: {Preview}\nPublishedFileId: {PublishedFileId}\nTags: {string.Join(",", Tags)}"; // \nDescription: {Description}";
         }
 
         private static string PathCombine(params string[] parts)
         {
             return string.Join(Path.DirectorySeparatorChar.ToString(), parts);
-        }
-
-        // copy-pasta from RimWorld.VersionControl
-        public static Version VersionFromString(string str)
-        {
-            if (string.IsNullOrEmpty(str)) throw new ArgumentException("str");
-            var array = str.Split('.');
-            if (array.Length > 3) throw new ArgumentException("str");
-            var major = 0;
-            var minor = 0;
-            var build = 0;
-            for (var i = 0; i < 3; i++)
-            {
-                int num;
-                if (!int.TryParse(array[i], out num)) throw new ArgumentException("str");
-                if (num < 0) throw new ArgumentException("str");
-                if (i != 0)
-                {
-                    if (i != 1)
-                    {
-                        if (i == 2) build = num;
-                    }
-                    else
-                    {
-                        minor = num;
-                    }
-                }
-                else
-                {
-                    major = num;
-                }
-            }
-
-            return new Version(major, minor, build);
         }
     }
 }
