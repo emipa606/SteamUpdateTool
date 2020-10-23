@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using Steamworks;
 
@@ -113,6 +114,15 @@ namespace RimworldModReleaseTool
             {
                 mod.PublishedFileId = createResult.m_nPublishedFileId;
                 Console.WriteLine("New mod created (" + mod.PublishedFileId + ")");
+                string path = $@"{mod.ContentFolder}\About\PublishedFileId.txt";
+                if (!File.Exists(path))
+                {
+                    // Create a file to write to.
+                    using (StreamWriter sw = File.CreateText(path))
+                    {
+                        sw.Write(mod.PublishedFileId);
+                    }
+                }
             }
 
             return createResult.m_eResult == EResult.k_EResultOK;
@@ -132,6 +142,8 @@ namespace RimworldModReleaseTool
             SteamUGC.SetItemContent(handle, mod.ContentFolder);
             if (mod.Preview != null)
                 SteamUGC.SetItemPreview(handle, mod.Preview);
+            if (creating)
+                SteamUGC.SetItemDescription(handle, mod.Description);
         }
 
         public static void Shutdown()
