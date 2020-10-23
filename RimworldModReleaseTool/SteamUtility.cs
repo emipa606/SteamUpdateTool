@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Steamworks;
 
@@ -38,7 +39,7 @@ namespace RimworldModReleaseTool
 
         public static bool Upload(Mod mod, string changeNotes)
         {
-            if(string.IsNullOrEmpty(changeNotes))
+            if (string.IsNullOrEmpty(changeNotes))
             {
                 changeNotes = $"[Auto-generated text]: Update on {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
             }
@@ -50,7 +51,7 @@ namespace RimworldModReleaseTool
                 Console.WriteLine("No PublishedFileId found, create new mod?");
                 Console.ReadLine();
 
-                if (!Create(mod)) 
+                if (!Create(mod))
                     throw new Exception("mod creation failed!");
             }
 
@@ -65,19 +66,33 @@ namespace RimworldModReleaseTool
 
             // keep checking for async call to complete
             var lastStatus = "";
+            var niceStatus = "";
             while (!ready.WaitOne(500))
             {
                 var status = SteamUGC.GetItemUpdateProgress(handle, out ulong done, out ulong total);
                 SteamAPI.RunCallbacks();
-                if (lastStatus != status.ToString())
+                if (lastStatus != status.ToString() && status.ToString() != "k_EItemUpdateStatusInvalid")
                 {
-                    Console.WriteLine($"Current step: {status}");
+                    niceStatus = status.ToString().Replace("k_EItemUpdateStatus", "");
+                    niceStatus = Regex.Replace(niceStatus, "(\\B[A-Z])", " $1");
+                    switch (niceStatus)
+                    {
+                        case "Uploading Content":
+                            Console.WriteLine($"{niceStatus} ({Math.Round((double)mod.ModBytes / 1000)} KB)");
+                            break;
+                        case "Uploading Preview File":
+                            Console.WriteLine($"{niceStatus} ({Math.Round((double)mod.PreviewBytes / 1000)} KB)");
+                            break;
+                        default:
+                            Console.WriteLine(niceStatus);
+                            break;
+                    }
                     lastStatus = status.ToString();
                 }
             }
 
             // we have completed!
-            if (submitResult.m_eResult != EResult.k_EResultOK) 
+            if (submitResult.m_eResult != EResult.k_EResultOK)
                 Console.WriteLine($"Unexpected result: {submitResult.m_eResult}");
             return submitResult.m_eResult == EResult.k_EResultOK;
         }
@@ -151,5 +166,6 @@ namespace RimworldModReleaseTool
             SteamAPI.Shutdown();
             _initialized = false;
         }
+
     }
 }

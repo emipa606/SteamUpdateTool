@@ -20,6 +20,8 @@ namespace RimworldModReleaseTool
             if (!File.Exists(about)) throw new Exception($"About.xml not found at ({about})");
 
             ContentFolder = path;
+            ModBytes = GetFolderSize(ContentFolder);
+
             Tags = new List<string>
             {
                 "Mod"
@@ -53,7 +55,10 @@ namespace RimworldModReleaseTool
             // get preview image
             var preview = PathCombine(path, "About", "Preview.png");
             if (File.Exists(preview))
+            {
                 Preview = preview;
+                PreviewBytes = (new FileInfo(preview)).Length;
+            }
 
             // get publishedFileId
             var pubfileIdPath = PathCombine(path, "About", "PublishedFileId.txt");
@@ -66,6 +71,9 @@ namespace RimworldModReleaseTool
         public string Name { get; }
         public string Preview { get; }
         public string Description { get; }
+        public long PreviewBytes { get; }
+        public long ModBytes { get; }
+
 
         public PublishedFileId_t PublishedFileId
         {
@@ -85,6 +93,18 @@ namespace RimworldModReleaseTool
         {
             return
                 $"Name: {Name}\nPreview: {Preview}\nPublishedFileId: {PublishedFileId}\nTags: {string.Join(",", Tags)}"; // \nDescription: {Description}";
+        }
+
+        private static long GetFolderSize(string folderPath)
+        {
+            string[] allFilesAndFolders = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+            long returnValue = 0;
+            foreach (string name in allFilesAndFolders)
+            {
+                FileInfo info = new FileInfo(name);
+                returnValue += info.Length;
+            }
+            return returnValue;
         }
 
         private static string PathCombine(params string[] parts)
