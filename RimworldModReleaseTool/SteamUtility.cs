@@ -158,7 +158,10 @@ namespace RimworldModReleaseTool
             if (mod.Preview != null)
                 SteamUGC.SetItemPreview(handle, mod.Preview);
             if (creating)
+            {
                 SteamUGC.SetItemDescription(handle, mod.Description);
+                SteamUGC.SetItemVisibility(handle, ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic);
+            }
         }
 
         public static void Shutdown()
